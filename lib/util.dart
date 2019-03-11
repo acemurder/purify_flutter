@@ -1,11 +1,22 @@
-
+import 'package:flutter/services.dart';
 import 'package:simple_permissions/simple_permissions.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
-
 const String SAVE_PATH = "Purify/";
 const String SUFFIX = ".mp4";
+const String CHANNEL_NAME = "purify_flutter/notify_media";
+
+const _platform = const MethodChannel(CHANNEL_NAME);
+
+
+Future<Null> notifyScanMedia(String path) async {
+  try {
+    await _platform.invokeMethod("mediaScan", {"path": path});
+  } on PlatformException catch (e) {
+
+  }
+}
 
 Future<String> getSavePath() async {
   Directory root = await getExternalStorageDirectory();

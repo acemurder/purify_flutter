@@ -67,9 +67,6 @@ class _SearchWidgetState extends State<SearchWidget>
                       return;
                     }
                     FocusScope.of(context).requestFocus(FocusNode());
-                    setState(() {
-                      _loading = true;
-                    });
                     _handleUrl(_controller.text);
                   },
                   child: new Center(child: new Text('搜索视频')),
@@ -117,7 +114,7 @@ class _SearchWidgetState extends State<SearchWidget>
                               new FlatButton(
                                   onPressed: () {
                                     debugPrint("下载 click");
-                                    _download(_videoDownloadUrl, context);
+                                    _download(_videoDownloadUrl);
                                     Navigator.of(context).pop();
                                   },
                                   child: new Text("下载")),
@@ -148,6 +145,9 @@ class _SearchWidgetState extends State<SearchWidget>
   }
 
   _handleUrl(String shareUrl) async {
+    setState(() {
+      _loading = true;
+    });
     try {
       dClient.interceptors.add(redirectUrlInterceptor);
       Response r = await dClient.get(Uri.parse(shareUrl).toString(),
@@ -165,11 +165,15 @@ class _SearchWidgetState extends State<SearchWidget>
         _videoDownloadUrl = downloadUrl;
       });
     } catch (e) {
-      debugPrint(e);
+      setState(() {
+        _loading = false;
+      });
+      _showDownloadMsgDialog("视频下载失败，检查url");
+      debugPrint(e.toString());
     }
   }
 
-  void _download(String url, BuildContext context) async {
+  void _download(String url) async {
     bool permitted = await checkStoragePermission();
     if (!permitted) {
       permitted = await requestStoragePermission();
@@ -191,21 +195,22 @@ class _SearchWidgetState extends State<SearchWidget>
                 })
               });
       if (r.statusCode == 200) {
+        notifyScanMedia(path);
         setState(() {
           _downloading = false;
         });
-        _showDownloadMsgDialog(context, "视频已下载到 $path");
+        _showDownloadMsgDialog("视频已下载到 $path");
       }
     } catch (e) {
       setState(() {
         _downloading = false;
       });
-      _showDownloadMsgDialog(context, "视频下载失败");
+      _showDownloadMsgDialog("视频下载失败");
       debugPrint(e);
     }
   }
 
-  void _showDownloadMsgDialog(BuildContext context, String message) {
+  void _showDownloadMsgDialog(String message) {
     showDialog(
         context: context,
         builder: (_) => new AlertDialog(
@@ -245,9 +250,31 @@ class _SearchWidgetState extends State<SearchWidget>
       if (reg.hasMatch(data.text)) {
         String videoUrl = reg.firstMatch(data.text).group(0);
         debugPrint(videoUrl);
-        setState(() {
-          _controller.text = videoUrl;
-        });
+        if(videoUrl == _controller.text){
+          return;
+        }
+        showDialog(
+            context: context,
+            builder: (_) => new AlertDialog(
+                  title: new Text("检测到url"),
+                  content: new Text("检查到url: $videoUrl ,是否搜索？"),
+                  actions: <Widget>[
+                    new FlatButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: new Text("取消")),
+                    new FlatButton(
+                        onPressed: () {
+                          setState(() {
+                            _controller.text = videoUrl;
+                          });
+                          Navigator.of(context).pop();
+                          _handleUrl(videoUrl);
+                        },
+                        child: new Text("搜索")),
+                  ],
+                ));
       }
     }
   }
