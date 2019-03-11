@@ -149,11 +149,10 @@ class _SearchWidgetState extends State<SearchWidget>
       _loading = true;
     });
     try {
-      dClient.interceptors.add(redirectUrlInterceptor);
-      Response r = await dClient.get(Uri.parse(shareUrl).toString(),
-          options: Options(followRedirects: false));
-      String id = r.data;
-      dClient.interceptors.remove(redirectUrlInterceptor);
+//      dClient.interceptors.add(redirectUrlInterceptor);
+      Response r = await dClient.get(Uri.parse(shareUrl).toString());
+      String id = r.realUri.pathSegments[2];
+//      dClient.interceptors.remove(redirectUrlInterceptor);
       r = await dClient.get(dPath, queryParameters: generateDParam(id));
       String coverUrl = r.data["aweme_detail"]["video"]["cover"]["url_list"][0];
       String downloadUrl =
