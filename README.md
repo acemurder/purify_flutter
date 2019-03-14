@@ -1,16 +1,15 @@
 # purify_flutter
 
-A new Flutter application.
+A short video download tool without a watermark.
 
-## Getting Started
+## How to use?
 
-This project is a starting point for a Flutter application.
+1. copy the share url from short video app;
+2. launch purify_flutter app and then paste the url;
 
-A few resources to get you started if this is your first Flutter project:
+   ![](img/purify1.png) ![](img/purify2.png)
 
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
+3. download.
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+   ![](img/purify3.png) ![](img/purify4.png) ![](img/purify5.png)
+

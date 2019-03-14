@@ -19,8 +19,8 @@ final String wPath = "/webapp/json/weishi/WSH5GetPlayPage";
 
 final BaseOptions dOptions = new BaseOptions(
   baseUrl: "https://api.amemv.com/",
-  connectTimeout: 5000,
-  receiveTimeout: 3000,
+  connectTimeout: 10000,
+  receiveTimeout: 10000,
   method: "GET",
 );
 
@@ -29,8 +29,8 @@ final Dio dClient = new Dio(dOptions);
 
 final BaseOptions wOptions = new BaseOptions(
   baseUrl: "https://h5.weishi.qq.com/",
-  connectTimeout: 5000,
-  receiveTimeout: 3000,
+  connectTimeout: 10000,
+  receiveTimeout: 10000,
   method: "GET",
 );
 final Dio wClient = new Dio(wOptions);
