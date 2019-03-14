@@ -94,8 +94,8 @@ class _SearchWidgetState extends State<SearchWidget>
           constraints: new BoxConstraints(
             minHeight: 300,
             minWidth: 200,
-            maxHeight: 600,
-            maxWidth: 400,
+            maxHeight: 450,
+            maxWidth: 300,
           ),
           child: new Stack(
             alignment: AlignmentDirectional.center,
@@ -109,8 +109,14 @@ class _SearchWidgetState extends State<SearchWidget>
                   showDialog(
                       context: context,
                       builder: (_) => new AlertDialog(
-                            content: new Text("下载视频"),
+                            title: new Text("下载视频"),
+                            content: new Text("是否保存视频到本地？"),
                             actions: <Widget>[
+                              new FlatButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: new Text("取消")),
                               new FlatButton(
                                   onPressed: () {
                                     debugPrint("下载 click");
@@ -118,11 +124,6 @@ class _SearchWidgetState extends State<SearchWidget>
                                     Navigator.of(context).pop();
                                   },
                                   child: new Text("下载")),
-                              new FlatButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: new Text("取消"))
                             ],
                           ));
                 },
@@ -149,15 +150,24 @@ class _SearchWidgetState extends State<SearchWidget>
       _loading = true;
     });
     try {
-//      dClient.interceptors.add(redirectUrlInterceptor);
-      Response r = await dClient.get(Uri.parse(shareUrl).toString());
-      String id = r.realUri.pathSegments[2];
-//      dClient.interceptors.remove(redirectUrlInterceptor);
-      r = await dClient.get(dPath, queryParameters: generateDParam(id));
-      String coverUrl = r.data["aweme_detail"]["video"]["cover"]["url_list"][0];
-      String downloadUrl =
-          r.data["aweme_detail"]["video"]["play_addr"]["url_list"][0];
-      debugPrint("$coverUrl , $downloadUrl");
+      String coverUrl;
+      String downloadUrl;
+      if (shareUrl.contains(D_SIGN)) {
+        Response r = await dClient.get(Uri.parse(shareUrl).toString());
+        String id = r.realUri.pathSegments[2];
+        r = await dClient.get(dPath, queryParameters: generateDParam(id));
+        coverUrl = r.data["aweme_detail"]["video"]["cover"]["url_list"][0];
+        downloadUrl =
+            r.data["aweme_detail"]["video"]["play_addr"]["url_list"][0];
+      } else if (shareUrl.contains(W_SIGN)) {
+        String id = Uri.parse(shareUrl).pathSegments[2];
+        Response r = await wClient.get(wPath, queryParameters: {"feedid": id});
+        coverUrl = r.data["data"]["feeds"][0]["images"][0]["url"];
+        downloadUrl = r.data["data"]["feeds"][0]["video_url"];
+      } else {
+        throw new Exception("only support w and d!");
+      }
+      debugPrint("cover: $coverUrl , video: $downloadUrl");
       setState(() {
         _loading = false;
         _imgUrl = coverUrl;
@@ -249,7 +259,10 @@ class _SearchWidgetState extends State<SearchWidget>
       if (reg.hasMatch(data.text)) {
         String videoUrl = reg.firstMatch(data.text).group(0);
         debugPrint(videoUrl);
-        if(videoUrl == _controller.text){
+        if (videoUrl == _controller.text) {
+          return;
+        }
+        if (!videoUrl.contains(W_SIGN) && !videoUrl.contains(D_SIGN)) {
           return;
         }
         showDialog(
@@ -282,6 +295,6 @@ class _SearchWidgetState extends State<SearchWidget>
   void dispose() {
     super.dispose();
     WidgetsBinding.instance.removeObserver(this);
-    print('dispose');
+    debugPrint('dispose');
   }
 }

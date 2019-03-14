@@ -60,6 +60,5 @@ class PermissionUtil {
 
   static getPermissionStatus(Permission permission) async {
     final res = await SimplePermissions.getPermissionStatus(permission);
-    print("permission status is " + res.toString());
   }
 }
